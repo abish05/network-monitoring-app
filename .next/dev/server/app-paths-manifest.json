@@ -1,0 +1,8 @@
+{
+  "/admin/settings/page": "app/admin/settings/page.js",
+  "/admin/users/page": "app/admin/users/page.js",
+  "/alerts/page": "app/alerts/page.js",
+  "/logs/page": "app/logs/page.js",
+  "/page": "app/page.js",
+  "/traffic/page": "app/traffic/page.js"
+}

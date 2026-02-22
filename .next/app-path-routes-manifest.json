@@ -1,0 +1,10 @@
+{
+  "/_global-error/page": "/_global-error",
+  "/_not-found/page": "/_not-found",
+  "/admin/settings/page": "/admin/settings",
+  "/admin/users/page": "/admin/users",
+  "/alerts/page": "/alerts",
+  "/logs/page": "/logs",
+  "/page": "/",
+  "/traffic/page": "/traffic"
+}
