@@ -19,6 +19,7 @@ export default function SettingsPage() {
         <p className="text-muted-foreground">Configure system parameters, notifications, and security policies</p>
       </div>
 
+
       <Tabs defaultValue="general" className="space-y-4">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>
