@@ -15,7 +15,8 @@ export function useRealTime(options?: RealTimeHookOptions) {
   const [loading, setLoading] = useState(true);
 
   const DEFAULT_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-  const wsUrl = options?.url || `ws://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${DEFAULT_PORT}`;
+  const defaultWsUrl = process.env.NEXT_PUBLIC_WS_URL || `ws://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${DEFAULT_PORT}`;
+  const wsUrl = options?.url || defaultWsUrl;
 
   useEffect(() => {
     let ws: WebSocket;
@@ -101,10 +102,12 @@ export function useRealTime(options?: RealTimeHookOptions) {
   useEffect(() => {
     const apiPort = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
     const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-    fetch(`http://${host}:${apiPort}/api/network`).then(r => r.json()).then((data) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || `http://${host}:${apiPort}`;
+    
+    fetch(`${apiUrl}/api/network`).then(r => r.json()).then((data) => {
       if (data) setNetwork(data);
     }).catch(() => {});
-    fetch(`http://${host}:${apiPort}/api/health`).then(r => r.json()).then((h) => {
+    fetch(`${apiUrl}/api/health`).then(r => r.json()).then((h) => {
       if (h) setHealth(h);
     }).catch(() => {});
   }, []);
@@ -112,7 +115,8 @@ export function useRealTime(options?: RealTimeHookOptions) {
   const updateAlertStatus = useCallback(async (alertId: string, status: string) => {
     try {
       const apiPort = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-      const response = await fetch(`http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${apiPort}/api/alerts/${alertId}/status`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${apiPort}`;
+      const response = await fetch(`${apiUrl}/api/alerts/${alertId}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
