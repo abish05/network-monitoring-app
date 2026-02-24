@@ -80,50 +80,7 @@ app.get('*', (req, res) => {
   return handle(req, res);
 });
 
-app.post('/api/alerts/:id/status', (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-  const alert = alerts.find(a => a.id === id);
-  if (alert) {
-    alert.status = status;
-    broadcastUpdate('alert-updated', alert);
-    res.json(alert);
-  } else {
-    res.status(404).json({ error: 'Alert not found' });
-  }
-});
 
-// WebSocket Connection
-wss.on('connection', (ws) => {
-  console.log('New WebSocket client connected');
-
-  ws.send(JSON.stringify({
-    type: 'initial-data',
-    data: { alerts, logs, networkData }
-  }));
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-});
-
-// Broadcast updates to all connected clients
-function broadcastUpdate(type, data) {
-  wss.clients.forEach(ws => {
-    if (ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({ type, data }));
-    }
-  });
-}
-
-// Broadcast real network data updates only (every 1s with network sampling)
-setInterval(() => {
-  // Broadcast network data if available
-  broadcastUpdate('network-update', networkData);
-  // Broadcast health status
-  const health = computeHealth();
-  broadcastUpdate('health-update', health);
-}, 1000);
 
 // Network sampling for macOS (uses `netstat -ib`) - computes bytes/sec
 function sampleNetworkStats() {
