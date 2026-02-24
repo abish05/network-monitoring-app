@@ -5,10 +5,10 @@
   "scripts": {
     "build": "next build",
     "dev": "node server.js & while [ ! -f .backend-port ]; do sleep 0.05; done; NEXT_PUBLIC_BACKEND_PORT=$(cat .backend-port) next dev",
-    "dev:frontend": "NEXT_PUBLIC_BACKEND_PORT=$(.backend-port 2>/dev/null || echo 5001) next dev",
+    "dev:frontend": "NEXT_PUBLIC_BACKEND_PORT=$(cat .backend-port 2>/dev/null || echo 5001) next dev",
     "dev:backend": "node server.js",
     "lint": "eslint .",
-    "start": "next start",
+    "start": "node server.js",
     "vercel-build": "next build"
   },
   "dependencies": {

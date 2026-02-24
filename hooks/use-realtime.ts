@@ -15,7 +15,15 @@ export function useRealTime(options?: RealTimeHookOptions) {
   const [loading, setLoading] = useState(true);
 
   const DEFAULT_PORT = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-  const defaultWsUrl = process.env.NEXT_PUBLIC_WS_URL || `ws://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${DEFAULT_PORT}`;
+  // Use the current origin for WebSockets, whether it's localhost or the Render domain.
+  // We determine WSS vs WS dynamically based on whether we are currently on HTTPS.
+  let defaultWsUrl = '';
+  if (typeof window !== 'undefined') {
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    defaultWsUrl = process.env.NEXT_PUBLIC_WS_URL || `${protocol}//${window.location.host}`;
+  } else {
+    defaultWsUrl = process.env.NEXT_PUBLIC_WS_URL || `ws://localhost:${DEFAULT_PORT}`;
+  }
   const wsUrl = options?.url || defaultWsUrl;
 
   useEffect(() => {
@@ -35,7 +43,7 @@ export function useRealTime(options?: RealTimeHookOptions) {
         ws.onmessage = (event) => {
           const message = JSON.parse(event.data);
 
-            switch (message.type) {
+          switch (message.type) {
             case 'initial-data':
               setAlerts(message.data.alerts);
               setLogs(message.data.logs);
@@ -100,22 +108,20 @@ export function useRealTime(options?: RealTimeHookOptions) {
 
   // Fetch initial network metrics via REST as a fallback
   useEffect(() => {
-    const apiPort = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-    const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || `http://${host}:${apiPort}`;
-    
+    // If not on the client, use localhost. If on client, use the origin we were loaded from!
+    const apiUrl = typeof window !== 'undefined' ? window.location.origin : `http://localhost:${process.env.NEXT_PUBLIC_BACKEND_PORT || '5001'}`;
+
     fetch(`${apiUrl}/api/network`).then(r => r.json()).then((data) => {
       if (data) setNetwork(data);
-    }).catch(() => {});
+    }).catch(() => { });
     fetch(`${apiUrl}/api/health`).then(r => r.json()).then((h) => {
       if (h) setHealth(h);
-    }).catch(() => {});
+    }).catch(() => { });
   }, []);
 
   const updateAlertStatus = useCallback(async (alertId: string, status: string) => {
     try {
-      const apiPort = process.env.NEXT_PUBLIC_BACKEND_PORT || '5001';
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || `http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}:${apiPort}`;
+      const apiUrl = typeof window !== 'undefined' ? window.location.origin : `http://localhost:${process.env.NEXT_PUBLIC_BACKEND_PORT || '5001'}`;
       const response = await fetch(`${apiUrl}/api/alerts/${alertId}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
